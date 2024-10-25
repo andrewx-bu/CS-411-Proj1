@@ -8,6 +8,15 @@ configure_logger(logger)
 
 
 def get_random() -> float:
+    """Gets a random two digit decimal number from random.org (between 0 and 1).
+
+    Returns:
+        float: A random number between 0 and 1 with 2 decimal places.
+
+    Raises:
+        ValueError: If the response from random.org is invalid
+        RuntimeError: If the request to random.org timed out or failed
+    """
     url = "https://www.random.org/decimal-fractions/?num=1&dec=2&col=1&format=plain&rnd=new"
 
     try:
