@@ -10,12 +10,20 @@ logger = logging.getLogger(__name__)
 configure_logger(logger)
 
 
+"""
+
+"""
+
 class BattleModel:
 
+
     def __init__(self):
+        """ Initalizes empty list of meals for BattleModel """
         self.combatants: List[Meal] = []
 
+
     def battle(self) -> str:
+        """ Battle between combatants and returns the winner meal  """
         logger.info("Two meals enter, one meal leaves!")
 
         if len(self.combatants) < 2:
@@ -69,10 +77,13 @@ class BattleModel:
         return winner.meal
 
     def clear_combatants(self):
+        """Removes the combatant list from the battle  """
+
         logger.info("Clearing the combatants list.")
         self.combatants.clear()
 
     def get_battle_score(self, combatant: Meal) -> float:
+        """Calculates the battle score for combatants """
         difficulty_modifier = {"HIGH": 1, "MED": 2, "LOW": 3}
 
         # Log the calculation process
@@ -88,10 +99,12 @@ class BattleModel:
         return score
 
     def get_combatants(self) -> List[Meal]:
+        """Retrieves the list current list of combatants """
         logger.info("Retrieving current list of combatants.")
         return self.combatants
 
     def prep_combatant(self, combatant_data: Meal):
+        """ Adds combatant to the list if there is room"""
         if len(self.combatants) >= 2:
             logger.error("Attempted to add combatant '%s' but combatants list is full", combatant_data.meal)
             raise ValueError("Combatant list is full, cannot add more combatants.")
