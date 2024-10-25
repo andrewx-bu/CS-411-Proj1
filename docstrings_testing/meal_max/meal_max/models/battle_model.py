@@ -9,8 +9,12 @@ from meal_max.utils.random_utils import get_random
 logger = logging.getLogger(__name__)
 configure_logger(logger)
 
+"""Two combatants are prepared for Thunderdiner and scores are assigned based by rules. The winner is 
+determined by scores and randomized number from random.org
 
-"""
+Attributes: 
+
+combatants(List[Meal]): list that contains two meal objects and represents combatants
 
 """
 
@@ -23,7 +27,12 @@ class BattleModel:
 
 
     def battle(self) -> str:
-        """ Battle between combatants and returns the winner meal  """
+        """ Battle between combatants and returns the winner meal 
+
+        Raises: when there is less than two combatants 
+
+        Returns:  a string of winner meal 
+        """
         logger.info("Two meals enter, one meal leaves!")
 
         if len(self.combatants) < 2:
@@ -77,13 +86,22 @@ class BattleModel:
         return winner.meal
 
     def clear_combatants(self):
-        """Removes the combatant list from the battle  """
+        """Removes the combatant list from the battle 
+        Raises: when there are no combatants to clear 
+        Returns: does not return anything 
+        """
 
         logger.info("Clearing the combatants list.")
         self.combatants.clear()
 
     def get_battle_score(self, combatant: Meal) -> float:
-        """Calculates the battle score for combatants """
+        """Calculates the battle score for combatants
+
+         Arg: combatant (meal): meal object that shows combatant and the score is calculated
+         Raises: when the level of difficulty is unfound 
+         Returns: float which calculate score for a combatant 
+          
+         """
         difficulty_modifier = {"HIGH": 1, "MED": 2, "LOW": 3}
 
         # Log the calculation process
@@ -99,12 +117,21 @@ class BattleModel:
         return score
 
     def get_combatants(self) -> List[Meal]:
-        """Retrieves the list current list of combatants """
+        """Retrieves the list current list of combatants 
+        Returns: a list of the present combatants 
+    
+        """
         logger.info("Retrieving current list of combatants.")
         return self.combatants
 
     def prep_combatant(self, combatant_data: Meal):
-        """ Adds combatant to the list if there is room"""
+        """ Adds combatant to the list if there is room
+
+        Args: combatant_data which shows the combatants that need to be added 
+        Raises: when there is two combatants in the list 
+        Returns: does not return anything 
+        
+        """
         if len(self.combatants) >= 2:
             logger.error("Attempted to add combatant '%s' but combatants list is full", combatant_data.meal)
             raise ValueError("Combatant list is full, cannot add more combatants.")
