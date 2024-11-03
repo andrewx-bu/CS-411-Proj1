@@ -23,8 +23,3 @@ def sample_combatants1():
 def sample_combatants1():
     return BattleModel([Meal (id=1, meal='Pasta', cuisine= 'Italian', price=12.00,difficulty='High'),
                         Meal(id=2, meal='Dumplings',cuisine= 'Chinese', price=10.00, dfficulty= 'Medium')])
-
-
-
-
-
