@@ -1,44 +1,48 @@
 import pytest
 import requests
 
-from unittest import mock
 from meal_max.utils.random_utils import get_random
 
-def test_get_random_success():
-    """Test a successful random number retrieval."""
-    with mock.patch('requests.get') as mock_get:
-        mock_get.return_value.text = '0.42'  # Simulating a successful response
-        mock_get.return_value.raise_for_status = mock.Mock()  # Simulating no error on status check
+RANDOM_NUMBER = 0.42
 
-        result = get_random()
-        
-        assert result == 0.42
-        mock_get.assert_called_once()
+@pytest.fixture
+def mock_random_org(mocker):
+    mock_response = mocker.Mock()
+    mock_response.text = f"{RANDOM_NUMBER}"
+    mocker.patch("requests.get", return_value=mock_response)
+    return mock_response
 
 
-def test_get_random_invalid_response():
-    """Test handling of invalid response."""
-    with mock.patch('requests.get') as mock_get:
-        mock_get.return_value.text = 'invalid'  # Simulating an invalid response
-        mock_get.return_value.raise_for_status = mock.Mock()  # Simulating no error on status check
+def test_get_random(mock_random_org):
+    """Test retrieving a random number from random.org."""
+    result = get_random()
 
-        with pytest.raises(ValueError, match="Invalid response from random.org: invalid"):
-            get_random()
+    # Assert that the result is the mocked random number
+    assert result == RANDOM_NUMBER, f"Expected random number {RANDOM_NUMBER}, but got {result}"
 
-
-def test_get_random_timeout():
-    """Test handling of request timeout."""
-    with mock.patch('requests.get') as mock_get:
-        mock_get.side_effect = requests.exceptions.Timeout  # Simulating a timeout
-
-        with pytest.raises(RuntimeError, match="Request to random.org timed out."):
-            get_random()
+    # Ensure that the correct URL was called
+    requests.get.assert_called_once_with("https://www.random.org/decimal-fractions/?num=1&dec=2&col=1&format=plain&rnd=new", timeout=5)
 
 
-def test_get_random_request_exception():
-    """Test handling of request exceptions."""
-    with mock.patch('requests.get') as mock_get:
-        mock_get.side_effect = requests.exceptions.RequestException("Network error")  # Simulating a network error
+def test_get_random_request_failure(mocker):
+    """Simulate a request failure."""
+    mocker.patch("requests.get", side_effect=requests.exceptions.RequestException("Connection error"))
 
-        with pytest.raises(RuntimeError, match="Request to random.org failed: Network error"):
-            get_random()
+    with pytest.raises(RuntimeError, match="Request to random.org failed: Connection error"):
+        get_random()
+
+
+def test_get_random_timeout(mocker):
+    """Simulate a timeout."""
+    mocker.patch("requests.get", side_effect=requests.exceptions.Timeout)
+
+    with pytest.raises(RuntimeError, match="Request to random.org timed out."):
+        get_random()
+
+
+def test_get_random_invalid_response(mock_random_org):
+    """Simulate an invalid response (non-numeric)."""
+    mock_random_org.text = "invalid_response"
+
+    with pytest.raises(ValueError, match="Invalid response from random.org: invalid_response"):
+        get_random()
