@@ -78,8 +78,7 @@ def create_meal(meal: str, cuisine: str, price: float, difficulty: str) -> None:
         raise e
 
 def clear_meals() -> None:
-    """
-    Recreates the meals table, effectively deleting all meals.
+    """Recreates the meals table, effectively deleting all meals.
 
     Raises:
         sqlite3.Error: If any database error occurs.
