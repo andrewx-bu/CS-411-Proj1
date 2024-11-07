@@ -1,8 +1,29 @@
+from contextlib import contextmanager
 import pytest
 
 from meal_max.models.battle_model import BattleModel
 from meal_max.models.kitchen_model import Meal
 
+# Mocking the database connection for tests
+@pytest.fixture
+def mock_cursor(mocker):
+    mock_conn = mocker.Mock()
+    mock_cursor = mocker.Mock()
+
+    # Mock the connection's cursor
+    mock_conn.cursor.return_value = mock_cursor
+    mock_cursor.fetchone.side_effect = lambda: (0,)
+    mock_cursor.fetchall.return_value = []
+    mock_conn.commit.return_value = None
+
+    # Mock the get_db_connection context manager from sql_utils
+    @contextmanager
+    def mock_get_db_connection():
+        yield mock_conn  # Yield the mocked connection object
+
+    mocker.patch("meal_max.models.kitchen_model.get_db_connection", mock_get_db_connection)
+
+    return mock_cursor  # Return the mock cursor so we can set expectations per test
 
 @pytest.fixture()
 def battle_model():
@@ -87,17 +108,13 @@ def test_get_battle_score(battle_model, sample_meal1, sample_meal2):
     assert battle_score1 == score1, f"Expected score for meal 1 to be {score1}, but got {battle_score1}"
     assert battle_score2 == score2, f"Expected score for meal 2 to be {score2}, but got {battle_score2}"
 
-def test_battle(battle_model, sample_meal1, sample_meal2):
+def test_battle(mock_cursor, battle_model, sample_meal1, sample_meal2):
     """Test successfully retrieving the battle score for a combatant."""
     battle_model.prep_combatant(sample_meal1)
     battle_model.prep_combatant(sample_meal2)
 
-    difficulty_modifier = {"HIGH": 1, "MED": 2, "LOW": 3}
-    battle_score1 = battle_model.get_battle_score(sample_meal1)
-    battle_score2 = battle_model.get_battle_score(sample_meal2)
-
     winner = battle_model.battle()
-    if battle_score1 > battle_score2:
+    if battle_model.get_battle_score(sample_meal1) > battle_model.get_battle_score(sample_meal2):
         expected_winner = sample_meal1.meal
     else:
         expected_winner = sample_meal2.meal

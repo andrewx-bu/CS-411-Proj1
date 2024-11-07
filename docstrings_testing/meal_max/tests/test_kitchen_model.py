@@ -250,24 +250,23 @@ def test_get_meal_by_name_bad_name(mock_cursor):
     with pytest.raises(ValueError, match="Meal with name Ramen not found"):
         get_meal_by_name("Ramen")
 
-# uhhh, seems like the get_leaderboard function doesn't sort at all?
 def test_get_leaderboard_ordered_by_wins(mock_cursor):
     """Test retrieving the leaderboard of meals sorted by wins."""
 
     # Simulate that there are multiple meals in the database
     mock_cursor.fetchall.return_value = [
-        (1, "Ramen", "Asian", 10.00, "MED", 10, 5, 0.5),
         (2, "Burger", "American", 7.50, "EASY", 100, 30, 0.3),
-        (3, "Birria Taco", "Mexican", 15.00, "HARD", 10, 8, 0.8)
+        (3, "Birria Taco", "Mexican", 15.00, "HARD", 10, 8, 0.8),
+        (1, "Ramen", "Asian", 10.00, "MED", 10, 5, 0.5)
     ]
 
     # Call the get_leaderboard function
     leaderboard = get_leaderboard()
     # Ensure the results match the expected output
     expected_result = [
-        {'id': 1, 'meal': "Ramen", 'cuisine': "Asian", 'price': 10.00, 'difficulty': "MED", 'battles': 10, 'wins': 5, 'win_pct': 50.0},
         {'id': 2, 'meal': "Burger", 'cuisine': "American", 'price': 7.50, 'difficulty': "EASY", 'battles': 100, 'wins': 30, 'win_pct': 30.0},
-        {'id': 3, 'meal': "Birria Taco", 'cuisine': "Mexican", 'price': 15.00, 'difficulty': "HARD", 'battles': 10, 'wins': 8, 'win_pct': 80.0}
+        {'id': 3, 'meal': "Birria Taco", 'cuisine': "Mexican", 'price': 15.00, 'difficulty': "HARD", 'battles': 10, 'wins': 8, 'win_pct': 80.0},
+        {'id': 1, 'meal': "Ramen", 'cuisine': "Asian", 'price': 10.00, 'difficulty': "MED", 'battles': 10, 'wins': 5, 'win_pct': 50.0}
     ]
     assert leaderboard == expected_result, f"Expected {expected_result}, but got {leaderboard}"
 
@@ -290,18 +289,18 @@ def test_get_leaderboard_ordered_by_win_pct(mock_cursor):
 
     # Simulate that there are multiple meals in the database
     mock_cursor.fetchall.return_value = [
+        (3, "Birria Taco", "Mexican", 15.00, "HARD", 10, 8, 0.8),
         (1, "Ramen", "Asian", 10.00, "MED", 10, 5, 0.5),
-        (2, "Burger", "American", 7.50, "EASY", 100, 30, 0.3),
-        (3, "Birria Taco", "Mexican", 15.00, "HARD", 10, 8, 0.8)
+        (2, "Burger", "American", 7.50, "EASY", 100, 30, 0.3)
     ]
 
     # Call the get_leaderboard function
     leaderboard = get_leaderboard(sort_by="win_pct")
     # Ensure the results match the expected output
     expected_result = [
+        {'id': 3, 'meal': "Birria Taco", 'cuisine': "Mexican", 'price': 15.00, 'difficulty': "HARD", 'battles': 10, 'wins': 8, 'win_pct': 80.0},
         {'id': 1, 'meal': "Ramen", 'cuisine': "Asian", 'price': 10.00, 'difficulty': "MED", 'battles': 10, 'wins': 5, 'win_pct': 50.0},
-        {'id': 2, 'meal': "Burger", 'cuisine': "American", 'price': 7.50, 'difficulty': "EASY", 'battles': 100, 'wins': 30, 'win_pct': 30.0},
-        {'id': 3, 'meal': "Birria Taco", 'cuisine': "Mexican", 'price': 15.00, 'difficulty': "HARD", 'battles': 10, 'wins': 8, 'win_pct': 80.0}
+        {'id': 2, 'meal': "Burger", 'cuisine': "American", 'price': 7.50, 'difficulty': "EASY", 'battles': 100, 'wins': 30, 'win_pct': 30.0}
     ]
     assert leaderboard == expected_result, f"Expected {expected_result}, but got {leaderboard}"
 
