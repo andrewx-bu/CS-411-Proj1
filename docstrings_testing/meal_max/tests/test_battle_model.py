@@ -107,5 +107,5 @@ def test_battle(battle_model, sample_meal1, sample_meal2):
 def test_battle_one_combatant(battle_model, sample_meal1):
     """ValueError should be raised when there is only one combatant."""
     battle_model.prep_combatant(sample_meal1)
-    with pytest.raises(ValueError, match="Two combatants are required for a battle"):
+    with pytest.raises(ValueError, match="Two combatants must be prepped for a battle."):
         battle_model.battle()
