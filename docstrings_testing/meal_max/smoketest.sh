@@ -53,9 +53,9 @@ check_db() {
 #
 ##########################################################
 
-clear_catalog() {
+clear_meals() {
   echo "Clearing the meals list..."
-  curl -s -X DELETE "$BASE_URL/clear-catalog" | grep -q '"status": "success"'
+  curl -s -X DELETE "$BASE_URL/clear-meals" | grep -q '"status": "success"'
 }
 
 create_meal() {
@@ -67,7 +67,7 @@ create_meal() {
 
   echo "Adding meal ($id - $meal, $cuisine) to the meals list..."
   curl -s -X POST "$BASE_URL/create-meal" -H "Content-Type: application/json" \
-    -d "{\"id\":\"$id\", \"meal\":\"$meal\", \"cuisine\":$cuisine, \"price\":\"$price\", \"difficulty\":$difficulty}" | grep -q '"status": "success"'
+    -d "{\"id\":\"$id\", \"meal\":\"$meal\", \"cuisine\":\"$cuisine\", \"price\":\"$price\", \"difficulty\":\"$difficulty\"}" | grep -q '"status": "success"'
 
   if [ $? -eq 0 ]; then
     echo "Meal added successfully."
@@ -89,22 +89,6 @@ delete_meal_by_id() {
     exit 1
   fi
 }
-
-get_all_meals() {
-  echo "Getting all meals in the playlist..."
-  response=$(curl -s -X GET "$BASE_URL/get-all-meals-from-catalog")
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "All meals retrieved successfully."
-    if [ "$ECHO_JSON" = true ]; then
-      echo "Meals JSON:"
-      echo "$response" | jq .
-    fi
-  else
-    echo "Failed to get meals."
-    exit 1
-  fi
-}
-
 
 get_meal_by_id() {
   meal_id=$1
@@ -159,10 +143,10 @@ get_random_meal() {
 check_health
 check_db
 
-# Clear the catalog
-clear_catalog
+# Clear the meals list
+clear_meals
 
-# Create songs
+# Create meals
 create_meal 1 "Ramen" "Asian" 10.0 "MED"
 create_meal 2 "Fentanyl" "American" 99.0 "HIGH"
 create_meal 3 "Potato" "Irish" 0.99 "LOW"

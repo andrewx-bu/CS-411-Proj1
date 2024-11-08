@@ -158,7 +158,7 @@ def test_delete_meal_already_deleted(mock_cursor):
     with pytest.raises(ValueError, match="Meal with ID 999 has been deleted"):
         delete_meal(999)
 
-def test_clear_catalog(mock_cursor, mocker):
+def test_clear_meals(mock_cursor, mocker):
     """Test clearing the entire meal catalog (removes all meals)."""
 
     # Mock the file reading
@@ -283,7 +283,6 @@ def test_get_leaderboard_ordered_by_wins(mock_cursor):
 
     assert actual_query == expected_query, "The SQL query did not match the expected structure."
 
-# uhhh, seems like the get_leaderboard function doesn't sort at all?
 def test_get_leaderboard_ordered_by_win_pct(mock_cursor):
     """Test retrieving the leaderboard of meals sorted by win percentage."""
 

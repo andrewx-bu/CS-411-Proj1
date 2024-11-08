@@ -114,7 +114,12 @@ def test_battle(mock_cursor, battle_model, sample_meal1, sample_meal2):
     battle_model.prep_combatant(sample_meal2)
 
     winner = battle_model.battle()
-    if battle_model.get_battle_score(sample_meal1) > battle_model.get_battle_score(sample_meal2):
+    score1 = battle_model.get_battle_score(sample_meal1)
+    score2 = battle_model.get_battle_score(sample_meal2)
+    # Need to get random.org output
+    delta = abs(score1 - score2) / 100
+    
+    if score1 > score2:
         expected_winner = sample_meal1.meal
     else:
         expected_winner = sample_meal2.meal
