@@ -15,7 +15,6 @@ while [ "$#" -gt 0 ]; do
   shift
 done
 
-
 ###############################################
 #
 # Health checks
@@ -46,18 +45,19 @@ check_db() {
   fi
 }
 
-
 ##########################################################
 #
 # Meal Management
 #
 ##########################################################
 
+# clear_catalog endpoint
 clear_meals() {
   echo "Clearing the meals list..."
   curl -s -X DELETE "$BASE_URL/clear-meals" | grep -q '"status": "success"'
 }
 
+# add_meal endpoint
 create_meal() {
   id=$1
   meal=$2
@@ -77,6 +77,7 @@ create_meal() {
   fi
 }
 
+# delete_meal endpoint
 delete_meal_by_id() {
   meal_id=$1
 
@@ -90,11 +91,12 @@ delete_meal_by_id() {
   fi
 }
 
+# get_meal_by_id endpoint
 get_meal_by_id() {
   meal_id=$1
 
   echo "Getting meal by ID ($meal_id)..."
-  response=$(curl -s -X GET "$BASE_URL/get-meal-from-catalog-by-id/$meal_id")
+  response=$(curl -s -X GET "$BASE_URL/get-meal-by-id/$meal_id")
   if echo "$response" | grep -q '"status": "success"'; then
     echo "Meal retrieved successfully by ID ($meal_id)."
     if [ "$ECHO_JSON" = true ]; then
@@ -107,34 +109,80 @@ get_meal_by_id() {
   fi
 }
 
+# get_meal_by_name endpoint
 get_meal_by_name() {
   meal=$1
 
-  echo "Getting song by name  (Meal: '$meal)..."
-  response=$(curl -s -X GET "$BASE_URL/get-meal-by-name?meal=$(echo $meal | sed 's/ /%20/g')")
+  echo "Getting meal by name ($meal)..."
+  response=$(curl -s -X GET "$BASE_URL/get-meal-by-name/$meal")
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Meal retrieved successfully by name."
+    echo "Meal retrieved successfully by name ($meal)."
     if [ "$ECHO_JSON" = true ]; then
-      echo "Meal JSON (by name):"
+      echo "Meal JSON (name $meal):"
       echo "$response" | jq .
     fi
   else
-    echo "Failed to get meal by name."
+    echo "Failed to get meal by name ($meal)."
     exit 1
   fi
 }
 
-get_random_meal() {
-  echo "Getting a random meal from the catalog..."
-  response=$(curl -s -X GET "$BASE_URL/get-random-meal")
+############################################################
+#
+# Battle Management
+#
+############################################################
+
+# clear_combatants endpoint
+clear_combatants() {
+  echo "Clearing combatants..."
+  response=$(curl -s -X POST "$BASE_URL/clear-combatants")
+
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Random meal retrieved successfully."
+    echo "Combatants cleared successfully."
+  else
+    echo "Failed to clear combatants."
+    exit 1
+  fi
+}
+
+# prep_combatant endpoint
+prep_combatant() {
+  meal_id=$1
+  meal=$2
+  cuisine=$3
+
+  echo "Adding meal to battle: $meal_id - $meal ($cuisine)..."
+
+  response=$(curl -s -X POST "$BASE_URL/prep-combatant" \
+    -H "Content-Type: application/json" \
+    -d "{\"meal_id\":$meal_id, \"meal\":\"$meal\", \"cuisine\":\"$cuisine\"}")
+
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "Meal prepped for battle succesfully"
     if [ "$ECHO_JSON" = true ]; then
-      echo "Random Meal JSON:"
+      echo "Meal JSON:"
       echo "$response" | jq .
     fi
   else
-    echo "Failed to get a random meal."
+    echo "Failed to prep meal for battle."
+    exit 1
+  fi
+}
+
+# get_combatants endpoint
+get_combatants() {
+  echo "Retrieving combatants list..."
+  response=$(curl -s -X GET "$BASE_URL/get-combatants")
+
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "Current combatants list retrieved successfully."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Current combatants list JSON:"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to retrieve combatants list."
     exit 1
   fi
 }
@@ -150,7 +198,7 @@ clear_meals
 create_meal 1 "Ramen" "Asian" 10.0 "MED"
 create_meal 2 "Fentanyl" "American" 99.0 "HIGH"
 create_meal 3 "Potato" "Irish" 0.99 "LOW"
-create_meal 4 "Pasta" "American" 14.0 "HIGH"
+create_meal 4 "Pasta" "Italian" 14.0 "HIGH"
 create_meal 5 "Cockroaches" "Alien" 5.0 "MED"
 
 delete_meal_by_id 1
@@ -158,4 +206,14 @@ get_all_meals
 
 get_meal_by_id 2
 get_meal_by_name "Fentanyl"
-get_random_meal
+
+clear_combatants
+
+prep_combatant 2 "Fentanyl" "American"
+prep_combatant 3 "Potato" "Irish"
+
+get_combatants
+
+# battle, get_leaderboard
+
+echo "All tests passed successfully!"
