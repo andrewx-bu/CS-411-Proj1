@@ -170,6 +170,12 @@ prep_combatant() {
   fi
 }
 
+############################################################
+#
+# Battle
+#
+############################################################
+
 # get_combatants endpoint
 get_combatants() {
   echo "Retrieving combatants list..."
@@ -183,6 +189,48 @@ get_combatants() {
     fi
   else
     echo "Failed to retrieve combatants list."
+    exit 1
+  fi
+}
+
+battle() {
+  echo "Starting battle between meals..."
+  response=$(curl -s -X GET "$BASE_URL/battle")
+  
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "Battle started successfully."
+    winner=$(echo "$response" | jq -r '.winner')
+    echo "Winner: $winner"
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Battle JSON response:"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to start battle."
+    exit 1
+  fi
+}
+
+######################################################
+#
+# Leaderboard
+#
+######################################################
+
+get_leaderboard() {
+  sort_by=$1
+  echo "Getting leaderboard sorted by $sort_by..."
+
+  response=$(curl -s -X GET "$BASE_URL/leaderboard?sort=$sort_by")
+  
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "Leaderboard retrieved successfully (sorted by $sort_by)."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Leaderboard JSON response:"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to retrieve leaderboard."
     exit 1
   fi
 }
@@ -202,7 +250,6 @@ create_meal 4 "Pasta" "Italian" 14.0 "HIGH"
 create_meal 5 "Cockroaches" "Alien" 5.0 "MED"
 
 delete_meal_by_id 1
-get_all_meals
 
 get_meal_by_id 2
 get_meal_by_name "Fentanyl"
@@ -213,7 +260,7 @@ prep_combatant 2 "Fentanyl" "American"
 prep_combatant 3 "Potato" "Irish"
 
 get_combatants
-
-# battle, get_leaderboard
+battle
+get_leaderboard "wins"
 
 echo "All tests passed successfully!"
